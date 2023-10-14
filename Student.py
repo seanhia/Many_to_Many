@@ -4,6 +4,7 @@ from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from typing import List                 # Use this for the list of Majors that this student has
 from StudentMajor import StudentMajor
+from Enrollment import Enrollment
 from datetime import datetime
 
 
@@ -25,6 +26,8 @@ class Student(Base):
     the relationship such that breaking the association at this end propagates a 
     deletion in the association table to go along with it."""
     majors: Mapped[List["StudentMajor"]] = relationship(back_populates="student",
+                                                        cascade="all, save-update, delete-orphan")
+    sections: Mapped[List["Enrollment"]] = relationship(back_populates="student",
                                                         cascade="all, save-update, delete-orphan")
     # __table_args__ can best be viewed as directives that we ask SQLAlchemy to
     # send to the database.  In this case, that we want two separate uniqueness
@@ -65,6 +68,21 @@ class Student(Base):
             if next_major.major == major:
                 self.majors.remove(next_major)
                 return
+    #to get many to many relationship with student/enrollment
+    def add_section(self, section):
+        for next_section in self.sections:
+            if next_section.student == section:
+                return
+        enrollment = Enrollment(section, self)
+        section.students.append(enrollment)
+        self.sections.append(enrollment)
+
+    def remove_section(self, section):
+        for next_section in self.sections:
+            if next_section.section == section:
+                self.sections.remove(next_section)
+                return
+
 
     def __str__(self):
         return f"Student ID: {self.studentID} name: {self.lastName}, {self.firstName} e-mail: {self.email}"

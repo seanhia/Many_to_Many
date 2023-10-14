@@ -10,7 +10,8 @@ from Course import Course
 from typing import List
 from datetime import time
 
-#ask professor if we still need check constraints/introspection calls
+
+# ask professor if we still need check constraints/introspection calls
 class Section(Base):
     """A group of students that meet for instruction at a particular day and time, while still
     teaching the same subject. For example, Section 1 of CECS 323 meets on Mondays and Wednesdays
@@ -40,7 +41,7 @@ class Section(Base):
     instructor: Mapped[str] = mapped_column('instructor', String(80), nullable=False)
 
     course: Mapped["Course"] = relationship(back_populates="sections")
-    #i think this how section "knows" all sectioins they're enrolled in
+    # i think this how section "knows" all sections they're enrolled in
     students: Mapped[List["Enrollment"]] = relationship(back_populates="section", cascade="all, save-update, "
                                                                                           "delete-orphan")
 
@@ -48,7 +49,7 @@ class Section(Base):
                                        "building", "room", name="sections_uk_01"),
                       UniqueConstraint("section_year", "semester", "schedule", "start_time",
                                        "instructor", name="sections_uk_02"),
-                      #might need another uk for section_id
+                      # might need another uk for section_id?
                       ForeignKeyConstraint([departmentAbbreviation, courseNumber],
                                            [Course.departmentAbbreviation, Course.courseNumber]))
 
@@ -65,19 +66,20 @@ class Section(Base):
         self.startTime = startTime
         self.instructor = instructor
 
-    #initialize migrated values from course into section
+    # initialize migrated values from course into section
     def set_course(self, course: Course):
         self.course = course
         self.departmentAbbreviation = course.departmentAbbreviation
         self.courseNumber = course.courseNumber
-    #basing off add_major/add_student
+
+    # basing off add_major/add_student from student.py
     def add_student(self, student):
         for next_student in self.students:
             if next_student.student == student:
                 return
         enrollment = Enrollment(student, self)
-        student.sections.append(enrollment)
-        self.students.append(enrollment)
+        student.sections.append(enrollment) #keep track of students enrolled in certain section
+        self.students.append(enrollment) #keeps track of enrollments for student
 
     def remove_enrollment(self, student):
         for next_student in self.students:
@@ -90,4 +92,3 @@ class Section(Base):
                f"Section Number: {self.sectionNumber}\nSemester: {self.semester}\nSection Year: {self.sectionYear}\n" \
                f"Building: {self.building}\nRoom: {self.room}\nSchedule: {self.schedule}\nStart Time: {self.startTime}\n" \
                f"Instructor: {self.instructor}"
-
