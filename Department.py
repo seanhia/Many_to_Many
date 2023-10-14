@@ -21,6 +21,12 @@ class Department(Base):
     majors: Mapped[List["Major"]] = relationship(back_populates="department")
     # The list of courses offered by this department
     courses: Mapped[List["Course"]] = relationship(back_populates="department")
+
+    chairName: Mapped[str] = mapped_column('chair_name', String(80), nullable=False)
+    building: Mapped[str] = mapped_column('building', String(10), nullable=False)
+    office: Mapped[int] = mapped_column('office', Integer, nullable=False)
+    description: Mapped[str] = mapped_column('description', String(80), nullable=False)
+
     # __table_args__ can best be viewed as directives that we ask SQLAlchemy to
     # send to the database.  In this case, that we want two separate uniqueness
     # constraints (candidate keys).
@@ -29,6 +35,11 @@ class Department(Base):
     def __init__(self, abbreviation: str, name: str):
         self.abbreviation = abbreviation
         self.name = name
+
+        self.chairName = chair_name
+        self.building = building
+        self.office = office
+        self.description = description
 
     def add_course(self, course):
         if course not in self.courses:
