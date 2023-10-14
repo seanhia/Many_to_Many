@@ -32,7 +32,7 @@ class Department(Base):
     # constraints (candidate keys).
     __table_args__ = (UniqueConstraint("name", name="departments_uk_01"), )
 
-    def __init__(self, abbreviation: str, name: str):
+    def __init__(self, abbreviation: str, name: str, chair_name: str, building: str, office: int, description: str):
         self.abbreviation = abbreviation
         self.name = name
 
