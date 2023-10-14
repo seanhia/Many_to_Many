@@ -1,20 +1,23 @@
 from orm_base import Base
 from sqlalchemy import Table
 from sqlalchemy.orm import Mapped, mapped_column, relationship, column_property
-from sqlalchemy import String, Integer
+from sqlalchemy import String, Integer, Identity
 from sqlalchemy.types import Time
 from sqlalchemy import UniqueConstraint, ForeignKeyConstraint, CheckConstraint
 from IntrospectionFactory import IntrospectionFactory
-from Department import Department
+from Enrollment import Enrollment
 from Course import Course
 from typing import List
+from datetime import time
 
-#ask professor if we still need check constraints
+#ask professor if we still need check constraints/introspection calls
 class Section(Base):
     """A group of students that meet for instruction at a particular day and time, while still
     teaching the same subject. For example, Section 1 of CECS 323 meets on Mondays and Wednesdays
      at 3:30 whereas Section 2 meets at 12 noon."""
     __tablename__ = "sections"
+    # Let SQLAlchemy handle the generation of section_id values for us.
+    sectionID: Mapped[int] = mapped_column('section_id', Integer, Identity(start=1, cycle=True), primary_key=True)
 
     departmentAbbreviation: Mapped[str] = mapped_column('department_abbreviation', String(10), primary_key=True)
     courseNumber: Mapped[int] = mapped_column('course_number', Integer, primary_key=True)
@@ -37,11 +40,15 @@ class Section(Base):
     instructor: Mapped[str] = mapped_column('instructor', String(80), nullable=False)
 
     course: Mapped["Course"] = relationship(back_populates="sections")
+    #i think this how section "knows" all sectioins they're enrolled in
+    students: Mapped[List["Enrollment"]] = relationship(back_populates="section", cascade="all, save-update, "
+                                                                                          "delete-orphan")
 
     __table_args__ = (UniqueConstraint("section_year", "semester", "schedule", "start_time",
                                        "building", "room", name="sections_uk_01"),
                       UniqueConstraint("section_year", "semester", "schedule", "start_time",
                                        "instructor", name="sections_uk_02"),
+                      #might need another uk for section_id
                       ForeignKeyConstraint([departmentAbbreviation, courseNumber],
                                            [Course.departmentAbbreviation, Course.courseNumber]))
 
@@ -63,4 +70,24 @@ class Section(Base):
         self.course = course
         self.departmentAbbreviation = course.departmentAbbreviation
         self.courseNumber = course.courseNumber
+    #basing off add_major/add_student
+    def add_student(self, student):
+        for next_student in self.students:
+            if next_student.student == student:
+                return
+        enrollment = Enrollment(student, self)
+        student.sections.append(enrollment)
+        self.students.append(enrollment)
+
+    def remove_enrollment(self, student):
+        for next_student in self.students:
+            if next_student.student == student:
+                self.students.remove(next_student)
+                return
+
+    def __str__(self):
+        return f"Department Abbreviation: {self.departmentAbbreviation}\nCourse Number: {self.courseNumber}\n" \
+               f"Section Number: {self.sectionNumber}\nSemester: {self.semester}\nSection Year: {self.sectionYear}\n" \
+               f"Building: {self.building}\nRoom: {self.room}\nSchedule: {self.schedule}\nStart Time: {self.startTime}\n" \
+               f"Instructor: {self.instructor}"
 
