@@ -445,9 +445,31 @@ def delete_section(session: Session):
 
 def delete_student_section(sess):
     #use remove_enrollment i think in here
-    pass
+    print("deleting a student from a section")
+    student: Student = select_student(sess)
+    section: Section = select_section(sess)
+    if not student or not section:
+        print("Student or section does not exist")
+        return
+    enrollment = sess.query(Enrollment).filter(Enrollment.student == student, Enrollment.section == section).first()
+    if not enrollment:
+        print("Student is not enrolled in this section")
+    else:
+        sess.delete(enrollment)
+
+
+
 def delete_section_student(sess):
-    pass
+    print("deleting section from a student")
+    student: Student = select_student(sess)
+    section: Section = select_section(sess)
+    if not student or not section:
+        print("Student or section does not exist")
+        return
+    if section in student.sections:
+        student.sections.remove(section)
+    else:
+        print("Student does not have that section")
 
 
 
@@ -547,6 +569,17 @@ def list_major_student(sess: Session):
         Student.lastName, Student.firstName, Major.description, Major.name).all()
     for stu in recs:
         print(f"Student name: {stu.lastName}, {stu.firstName}, Major: {stu.name}, Description: {stu.description}")
+
+def list_student_section(sess: Session):
+    #Prompt user for section and list students enrolled in that section
+    section: Section = select_section(sess)
+    if not section:
+        print("Section not found")
+        return
+    students_in_section = sess.query(Student).join(Enrollment, Enrollment.studentID == Student.id).filter(Enrollment.section_id == Section.id).all()
+
+    for stu in students_in_section:
+        print(f"Student name: {stu.lastName},{stu.firstName}")
 
 
 def move_course_to_new_department(sess: Session):
