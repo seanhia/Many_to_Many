@@ -15,6 +15,7 @@ from Enrollment import Enrollment
 from Section import Section
 from Option import Option
 from Menu import Menu
+from datetime import time
 
 
 def add(sess: Session):
@@ -151,6 +152,82 @@ def add_student(session: Session):
                 print("We already have a student with that email address.  Try again.")
     new_student = Student(last_name, first_name, email)
     session.add(new_student)
+
+def add_section(session):
+    print("Which course offers this section?")
+    course: Course = select_course(sess)
+    unique_section_number: bool = False
+    #for set of uk's i. no more than 1 section in same room at same time
+    unique_room_set: bool = False
+    #for set of uk's ii. never overbook instructor teaching 2 sections at same time
+    unique_instructor_set: bool = False
+
+    section_number: int = -1
+    section_year: int = -1
+    semester: str = ''
+    schedule: str = ''
+    startTime: time = time(0, 0, 0)
+    building: str = ''
+    room: int = -1
+    instructor: str = ''
+
+    while not unique_section_number or not unique_room_set or not unique_instructor_set:
+        sectionNumber = int(input("Section number--> "))
+        sectionYear = int(input("Section Year--> "))
+        semester = input("Section semester--> ")
+        schedule = input("Schedule--> ")
+        startTimeHour = int(input("Section start time hour--> "))
+        startTimeMinute = int(input("Section start time minute--> "))
+        building = input("Section building--> ")
+        room = int(input("Section room--> "))
+        instructor = input("Section instructor--> ")
+
+        valid_semester = True
+        if semester not in ('Fall', 'Spring', 'Winter', 'Summer I', 'Summer II'):
+            print("Invalid semester. Try again.")
+            valid_semester = False
+        valid_schedule = True
+        if schedule not in ('MW', 'TuTh', 'MWF', 'F', 'S'):
+            print("Invalid schedule. Try again.")
+            valid_schedule = False
+        valid_building = True
+        if building not in ('VEC', 'ECS', 'EN2', 'EN3', 'EN4', 'ET', 'SSPA'):
+            print("Invalid building. Try again.")
+            valid_building = False
+
+        if valid_semester or valid_schedule or valid_building:
+            section_number_count: int = session.query(Section).filter(Section.departmentAbbreviation == course.departmentAbbreviation,
+                                                                      Section.courseNumber == course.courseNumber,
+                                                                      Section.sectionYear == sectionYear,
+                                                                      Section.sectionNumber == sectionNumber,
+                                                                      Section.semester == semester).count()
+            unique_section_number = section_number_count == 0
+            if not unique_section_number:
+                print("We already have a section with that number for this course. Try again.")
+            if unique_section_number:
+                room_set_count: int = session.query(Section).filter(Section.sectionYear == sectionYear,
+                                                                           Section.semester == semester,
+                                                                           Section.schedule == schedule,
+                                                                           Section.startTime == startTime,
+                                                                           Section.building == building,
+                                                                           Section.room == room).count()
+                unique_room_set = room_set_count == 0
+                if not unique_room_set:
+                    print("We already have a section with the same year, semester, schedule, start time, and in the same room."
+                          "Try again.")
+                if unique_room_set:
+                    instructor_set_count: int = session.query(Section).filter(Section.sectionYear == sectionYear,
+                                                                              Section.semester == semester,
+                                                                              Section.schedule == schedule,
+                                                                              Section.startTime == startTime,
+                                                                              Section.instructor == instructor).count()
+                    unique_instructor_set = instructor_set_count == 0
+                    if not unique_instructor_set:
+                        print("We already have a section with the same year, semester, schedule, start time, taught by the same"
+                                  "instructor. Try again.")
+        startTime = time(startTimeHour, startTimeMinute, 0)
+        newSection = Section(course, sectionNumber, semester, sectionYear, schedule, room, building, startTime, instructor)
+        session.add(newSection)
 def add_student_section(sess):
     pass
     #need to enroll student in a section
@@ -353,8 +430,25 @@ def delete_department(session: Session):
               "then come back here to delete the department.")
     else:
         session.delete(department)
+#added
+def delete_section(session: Session):
+    print("deleting a section")
+    section = select_section(session)
+    n_enrollments = session.query(Enrollment).filter(Enrollment.studentID == Student.studentID).count()
+    if n_enrollments > 0:
+        print(f"Sorry, there are {n_enrollments} enrollments in that section. Delete them first, "
+              f"then come back here to delete the section.")
+    else:
+        session.delete(section)
 
-def delete
+#def delete_course(session: Session): ? not sure if we need this ?
+
+def delete_student_section(sess):
+    #use remove_enrollment i think in here
+    pass
+def delete_section_student(sess):
+    pass
+
 
 
 def delete_student_major(sess):

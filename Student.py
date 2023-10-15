@@ -79,7 +79,7 @@ class Student(Base):
         section.students.append(enrollment)
         self.sections.append(enrollment)
 
-    def remove_section(self, section):
+    def remove_enrollment(self, section):
         for next_section in self.sections:
             if next_section.section == section:
                 self.sections.remove(next_section)
