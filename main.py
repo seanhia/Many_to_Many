@@ -11,6 +11,8 @@ from Course import Course
 from Major import Major
 from Student import Student
 from StudentMajor import StudentMajor
+from Enrollment import Enrollment
+from Section import Section
 from Option import Option
 from Menu import Menu
 
@@ -149,6 +151,14 @@ def add_student(session: Session):
                 print("We already have a student with that email address.  Try again.")
     new_student = Student(last_name, first_name, email)
     session.add(new_student)
+def add_student_section(sess):
+    pass
+    #need to enroll student in a section
+
+def add_section_student(sess):
+    pass
+    #need to enroll section to a student, similar to below methods
+
 
 
 def add_student_major(sess):
@@ -266,6 +276,33 @@ def select_student(sess) -> Student:
                                                   Student.firstName == first_name).first()
     return student
 
+def select_section(sess) -> Section: #still need to work on this one
+    #prompt the user for a course
+    #go to the list of sections within that course object and display the sections
+    found: bool = False
+    sectionYear = -1
+    semester = ''
+    schedule = ''
+    instructor = ''
+    while not found:
+        sectionYear = int(input("Section section year--> "))
+        semester = input("Section semester--> ")
+        schedule = input("Section schedule--> ")
+        instructor = input("Section instructor--> ")
+
+        year_count: int = sess.query(Section).filter(Section.sectionYear == sectionYear,
+                                                     Section.semester == semester,
+                                                     Section.schedule == schedule,
+                                                     Section.instructor == instructor).count()
+        found = year_count == 1
+        if not found:
+            print("No section with those values for that course. Try again.")
+    section = sess.query(Section).filter(Section.sectionYear == sectionYear,
+                                         Section.semester == semester,
+                                         Section.schedule == schedule,
+                                         Section.instructor == instructor).first()
+    print("Selected section:\n", section)
+    return section
 
 def select_major(sess) -> Major:
     """
@@ -316,6 +353,8 @@ def delete_department(session: Session):
               "then come back here to delete the department.")
     else:
         session.delete(department)
+
+def delete
 
 
 def delete_student_major(sess):

@@ -2,7 +2,7 @@ from orm_base import Base
 from sqlalchemy import Column, Integer, UniqueConstraint, Identity
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from typing import List                 # Use this for the list of Majors that this student has
+from typing import List  # Use this for the list of Majors that this student has
 from StudentMajor import StudentMajor
 from Enrollment import Enrollment
 from datetime import datetime
@@ -49,11 +49,12 @@ class Student(Base):
         # Make sure that this student does not already have this major.
         for next_major in self.majors:
             if next_major.major == major:
-                return                  # This student already has this major
+                return  # This student already has this major
         # Create the new instance of StudentMajor to connect this Student to the supplied Major.
         student_major = StudentMajor(self, major, datetime.now())
-#        major.students.append(student_major)                # Add this Student to the supplied Major.
-#        self.majors.append(student_major)                   # Add the supplied Major to this student.
+
+    #        major.students.append(student_major)                # Add this Student to the supplied Major.
+    #        self.majors.append(student_major)                   # Add the supplied Major to this student.
 
     def remove_major(self, major):
         """
@@ -68,7 +69,8 @@ class Student(Base):
             if next_major.major == major:
                 self.majors.remove(next_major)
                 return
-    #to get many to many relationship with student/enrollment
+
+    # to get many to many relationship with student/enrollment
     def add_section(self, section):
         for next_section in self.sections:
             if next_section.student == section:
@@ -82,7 +84,6 @@ class Student(Base):
             if next_section.section == section:
                 self.sections.remove(next_section)
                 return
-
 
     def __str__(self):
         return f"Student ID: {self.studentID} name: {self.lastName}, {self.firstName} e-mail: {self.email}"
