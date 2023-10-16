@@ -42,7 +42,7 @@ class Section(Base):
 
     course: Mapped["Course"] = relationship(back_populates="sections")
     # i think this how section "knows" all sections they're enrolled in
-    students: Mapped[List["Enrollment"]] = relationship(back_populates="section", cascade="all, save-update, "
+    enrollments: Mapped[List["Enrollment"]] = relationship(back_populates="section", cascade="all, save-update, "
                                                                                           "delete-orphan")
 
     __table_args__ = (UniqueConstraint("section_year", "semester", "schedule", "start_time",
@@ -50,6 +50,7 @@ class Section(Base):
                       UniqueConstraint("section_year", "semester", "schedule", "start_time",
                                        "instructor", name="sections_uk_02"),
                       # might need another uk for section_id?
+                      UniqueConstraint("section_id", name="sections_uk_03"),
                       ForeignKeyConstraint([departmentAbbreviation, courseNumber],
                                            [Course.departmentAbbreviation, Course.courseNumber]))
 
@@ -78,7 +79,7 @@ class Section(Base):
             if next_student.student == student:
                 return
         enrollment = Enrollment(student, self)
-        student.sections.append(enrollment) #keep track of students enrolled in certain section
+        student.enrollments.append(enrollment) #keep track of students enrolled in certain section
         self.students.append(enrollment) #keeps track of enrollments for student
 
     def remove_enrollment(self, student):

@@ -27,8 +27,8 @@ class Student(Base):
     deletion in the association table to go along with it."""
     majors: Mapped[List["StudentMajor"]] = relationship(back_populates="student",
                                                         cascade="all, save-update, delete-orphan")
-    sections: Mapped[List["Enrollment"]] = relationship(back_populates="student",
-                                                        cascade="all, save-update, delete-orphan")
+    enrollments: Mapped[List["Enrollment"]] = relationship(back_populates="student",
+                                                           cascade="all, save-update, delete-orphan")
     # __table_args__ can best be viewed as directives that we ask SQLAlchemy to
     # send to the database.  In this case, that we want two separate uniqueness
     # constraints (candidate keys).
@@ -72,17 +72,17 @@ class Student(Base):
 
     # to get many to many relationship with student/enrollment
     def add_section(self, section):
-        for next_section in self.sections:
+        for next_section in self.enrollments:
             if next_section.student == section:
                 return
         enrollment = Enrollment(section, self)
         section.students.append(enrollment)
-        self.sections.append(enrollment)
+        self.enrollments.append(enrollment)
 
     def remove_enrollment(self, section):
-        for next_section in self.sections:
+        for next_section in self.enrollments:
             if next_section.section == section:
-                self.sections.remove(next_section)
+                self.enrollments.remove(next_section)
                 return
 
     def __str__(self):
