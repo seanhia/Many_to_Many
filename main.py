@@ -153,7 +153,7 @@ def add_student(session: Session):
     new_student = Student(last_name, first_name, email)
     session.add(new_student)
 
-def add_section(session):
+def add_section(session): #ask if we need an add_section?
     print("Which course offers this section?")
     course: Course = select_course(sess)
     unique_section_number: bool = False
@@ -229,12 +229,34 @@ def add_section(session):
         newSection = Section(course, sectionNumber, semester, sectionYear, schedule, room, building, startTime, instructor)
         session.add(newSection)
 def add_student_section(sess):
-    pass
-    #need to enroll student in a section
+    student: Student = select_student(sess)
+    section: Section = select_section(sess)
+    student_section_count: int = sess.query(Enrollment).filter(Enrollment.studentID == student.studentID,
+                                                               Enrollment.sectionID == section.sectionID)
+    unique_student_section: bool = student_section_count == 0
+    while not unique_student_section:
+        print("That student is already enrolled in that section. Try again.")
+        student = select_student(sess)
+        section = select_section(sess)
+    student.add_section(section)
+    sess.add(student)
+    sess.flush()
+    #need to enroll student in a section, finished
 
 def add_section_student(sess):
-    pass
-    #need to enroll section to a student, similar to below methods
+    section: Section = select_section(sess)
+    student: Student = select_student(sess)
+    section_student_count: int = sess.query(Enrollment).filter(Enrollment.studentID == student.studentID,
+                                                               Enrollment.sectionID == section.sectionID)
+    unique_section_student: bool = section_student_count == 0
+    while not unique_section_student:
+        print("That section already has that student enrolled in it. Try again.")
+        section = select_section(sess)
+        student = select_student(sess)
+    section.add_student(student)
+    sess.add(section)
+    sess.flush()
+    #need to enroll section to a student, similar to below methods, finished
 
 
 
@@ -466,8 +488,8 @@ def delete_section_student(sess):
     if not student or not section:
         print("Student or section does not exist")
         return
-    if section in student.sections:
-        student.sections.remove(section)
+    if section in student.enrollments:
+        student.enrollments.remove(section)
     else:
         print("Student does not have that section")
 
@@ -669,7 +691,8 @@ def boilerplate(sess):
     :param sess:    The session that's open.
     :return:        None
     """
-    department: Department = Department('CECS', 'Computer Engineering Computer Science')
+    department: Department = Department('CECS', 'Computer Engineering Computer Science', 'John Smith', 'ECS',
+                                        500, 'The study of computers')
     major1: Major = Major(department, 'Computer Science', 'Fun with blinking lights')
     major2: Major = Major(department, 'Computer Engineering', 'Much closer to the silicon')
     student1: Student = Student('Brown', 'David', 'david.brown@gmail.com')
