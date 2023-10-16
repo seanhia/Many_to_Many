@@ -257,7 +257,7 @@ def add_section(session): #ask if we need an add_section?
                         print("We already have a section with the same year, semester, schedule, start time, taught by the same"
                                   "instructor. Try again.")
         startTime = time(startTimeHour, startTimeMinute, 0)
-        newSection = Section(course, sectionNumber, semester, sectionYear, schedule, room, building, startTime, instructor)
+        newSection = Section(course, sectionNumber, semester, sectionYear, building, room, schedule, startTime, instructor)
         session.add(newSection)
 def add_student_section(sess):
     student: Student = select_student(sess)
