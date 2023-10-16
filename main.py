@@ -629,7 +629,8 @@ def list_student_section(sess: Session):
     if not section:
         print("Section not found")
         return
-    students_in_section = sess.query(Student).join(Enrollment, Enrollment.studentID == Student.id).filter(Enrollment.section_id == Section.id).all()
+    students_in_section = sess.query(Student).join(Enrollment, Enrollment.studentID == Student.studentID).filter\
+        (Enrollment.sectionID == Section.sectionID).all()
 
     for stu in students_in_section:
         print(f"Student name: {stu.lastName},{stu.firstName}")
