@@ -48,22 +48,53 @@ def add_department(session: Session):
     """
     unique_name: bool = False
     unique_abbreviation: bool = False
+    unique_chairName: bool = False
+    unique_building_and_office: bool = False
+    unique_description: bool = False
+
     name: str = ''
     abbreviation: str = ''
+    chairName: str = ''
+    building: str = ''
+    office: int = 0
+    description: str = ''
+
+
     while not unique_abbreviation or not unique_name:
         name = input("Department full name--> ")
         abbreviation = input("Department abbreviation--> ")
+        chair = input("Department chair name--> ")
+        building = input("Department building--> ")
+        office = input("Department office--> ")
+        description = input("Department description--> ")
+
         name_count: int = session.query(Department).filter(Department.name == name).count()
         unique_name = name_count == 0
         if not unique_name:
             print("We already have a department by that name.  Try again.")
         if unique_name:
-            abbreviation_count = session.query(Department). \
-                filter(Department.abbreviation == abbreviation).count()
+            abbreviation_count = session.query(Department).filter(Department.abbreviation == abbreviation).count()
             unique_abbreviation = abbreviation_count == 0
             if not unique_abbreviation:
                 print("We already have a department with that abbreviation.  Try again.")
-    new_department = Department(abbreviation, name)
+            if unique_abbreviation:
+                chair_count: int = session.query(Department).filter(Department.chairName == chair)
+                unique_chairName = chair_count == 0
+                if not unique_chairName:
+                    print("We already have a department with that chair name. Try again.")
+                if unique_chairName:
+                    build_count: int = session.query(Department).filter(Department.building == building, Department.office == office).count()
+                    unique_building_and_office = build_count == 0
+                    if not unique_building_and_office:
+                        print("We already have a department with that building and office. Try again.")
+                    if unique_building_and_office:
+                        description_count: int = session.query(Department).filter(Department.description == description).count()
+                        unique_description = description_count == 0
+                        if not unique_description:
+                            print("We already have a department with that description. Try again.")
+
+
+    new_department = Department(abbreviation, name, chairName, building,office, description)
     session.add(new_department)
 
 
