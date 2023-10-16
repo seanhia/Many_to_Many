@@ -28,8 +28,11 @@ add_menu = Menu('add', 'Please indicate what you want to add:', [
     Option("Course", "add_course(sess)"),
     Option("Major", "add_major(sess)"),
     Option("Student", "add_student(sess)"),
+    Option("Section", "add_section(sess)"),
     Option("Student to Major", "add_student_major(sess)"),
     Option("Major to Student", "add_major_student(sess)"),
+    Option("Student to Section", "add_student_section(sess)"),
+    Option("Section to Student", "add_section_student"),
     Option("Exit", "pass")
 ])
 
@@ -48,6 +51,7 @@ list_menu = Menu('list', 'Please indicate what you want to list:', [
     Option("Course", "list_course(sess)"),
     Option("Major", "list_major(sess)"),
     Option("Student", "list_student(sess)"),
+    Option("Student to Section", "list_student_section(sess)"),
     Option("Student to Major", "list_student_major(sess)"),
     Option("Major to Student", "list_major_student(sess)"),
     Option("Exit", "pass")
