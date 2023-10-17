@@ -623,17 +623,30 @@ def list_major_student(sess: Session):
     for stu in recs:
         print(f"Student name: {stu.lastName}, {stu.firstName}, Major: {stu.name}, Description: {stu.description}")
 
-def list_student_section(sess: Session):
+def list_section_student(sess: Session): #might still need work i haven't tested it
     #Prompt user for section and list students enrolled in that section
     section: Section = select_section(sess)
     if not section:
         print("Section not found")
         return
-    students_in_section = sess.query(Student).join(Enrollment, Enrollment.studentID == Student.studentID).filter\
-        (Enrollment.sectionID == Section.sectionID).all()
+    students_in_section = sess.query(Student).join(Enrollment, Enrollment.sectionID == Student.se).join(
+        Student, Enrollment.sectionID == Section.sectionID).filter(
+    Section.sectionID == section.sectionID).add_columns(Student.lastName,Student.firstName, Section.sectionID).all()
 
     for stu in students_in_section:
-        print(f"Student name: {stu.lastName},{stu.firstName}")
+        print(f"Student name: {stu.lastName}, {stu.firstName}, Section: {stu.sectionID}")
+
+def list_student_section(sess: Session): #might still need work i haven't tested it
+    #prompt user for student and list the sections the student is enrolled in
+    student: Student = select_section(sess)
+    if not student:
+        print("Student not found")
+        return
+    sections_in_student = sess.query(Section).join(Enrollment, Enrollment.sectionID == Section.sectionID).join(
+    Section, Enrollment.studentID == Student.studentID).filter(Student.studentID == student.studentID).add_coumns(Student.lastName,Student.firstName, Section.sectionID).all()
+
+    for stu in sections_in_student:
+        print(f"Student name: {stu.lastName}, {stu.firstName}, Section: {stu.sectionID}")
 
 
 def move_course_to_new_department(sess: Session):
