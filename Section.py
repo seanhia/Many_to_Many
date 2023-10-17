@@ -34,15 +34,14 @@ class Section(Base):
 
     room: Mapped[int] = mapped_column('room', Integer, nullable=False)
     building: Mapped[str] = mapped_column('building', String(6),
-                                          CheckConstraint(
-                                              "building IN('VEC', 'ECS', 'EN2', 'EN3', 'EN4', 'ET', 'SSPA')",
-                                              name="building_values_check"), nullable=False)
+                                          CheckConstraint("building IN('VEC','ECS','EN2','EN3','EN4','ET','SSPA')",
+                                                          name="building_values_check"), nullable=False)
     startTime: Mapped[Time] = mapped_column('start_time', Time, nullable=False)
     instructor: Mapped[str] = mapped_column('instructor', String(80), nullable=False)
 
-    course: Mapped["Course"] = relationship(back_populates="sections")
+    course: Mapped[List["Course"]] = relationship(back_populates="sections")
     # i think this how section "knows" all sections they're enrolled in
-    enrollments: Mapped[List["Enrollment"]] = relationship(back_populates="section", cascade="all, save-update, "
+    students: Mapped[List["Enrollment"]] = relationship(back_populates="section", cascade="all, save-update, "
                                                                                           "delete-orphan")
 
     __table_args__ = (UniqueConstraint("section_year", "semester", "schedule", "start_time",
@@ -50,7 +49,8 @@ class Section(Base):
                       UniqueConstraint("section_year", "semester", "schedule", "start_time",
                                        "instructor", name="sections_uk_02"),
                       # might need another uk for section_id?
-                      UniqueConstraint("section_id", name="sections_uk_03"),
+                      UniqueConstraint("department_abbreviation", "course_number", "section_number", "semester",
+                                       "section_year", name="sections_uk_03"),
                       ForeignKeyConstraint([departmentAbbreviation, courseNumber],
                                            [Course.departmentAbbreviation, Course.courseNumber]))
 
@@ -78,9 +78,7 @@ class Section(Base):
         for next_student in self.students:
             if next_student.student == student:
                 return
-        enrollment = Enrollment(student, self)
-        student.enrollments.append(enrollment) #keep track of students enrolled in certain section
-        self.students.append(enrollment) #keeps track of enrollments for student
+        enrollment = Enrollment(self, student)
 
     def remove_enrollment(self, student):
         for next_student in self.students:
