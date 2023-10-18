@@ -466,15 +466,13 @@ def delete_student(session: Session):
     :param session:     The current connection to the database.
     :return:            None
     """
-    student: Student = select_student(session)
-    """This is a bit ghetto.  The relationship from Student to StudentMajor has 
-    cascade delete, so this delete will work even if a student has declared one
-    or more majors.  I could write a method on Student that would return some
-    indication of whether it has any children, and use that to let the user know
-    that they cannot delete this particular student.  But I'm too lazy at this
-    point.
-    """
-    session.delete(student)
+    print("deleting a student")
+    student = select_student(session)
+    n_sections = session.query(Enrollment).filter(Enrollment.sectionId == Section.sectionId).count()
+    if n_sections > 0:
+        print(f"Sorry, this student is enrolled in {n_sections} sections. Delete them first, then try again.")
+    else:
+        session.delete(student)
 
 
 def delete_department(session: Session):
@@ -504,8 +502,6 @@ def delete_section(session: Session):
     else:
         session.delete(section)
 
-
-# def delete_course(session: Session): ? not sure if we need this ?
 
 def delete_student_section(sess):
     # use remove_enrollment i think in here
