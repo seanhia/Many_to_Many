@@ -633,7 +633,7 @@ def list_major_student(sess: Session):
         print(f"Student name: {stu.lastName}, {stu.firstName}, Major: {stu.name}, Description: {stu.description}")
 
 def list_student_section(sess: Session):
-    #Prompt user for section and list students enrolled in that section
+    #Prompt user for student and list sections enrolled in that section
     student: Student = select_student(sess)
     if not student:
         print("Student not found")
@@ -647,7 +647,7 @@ def list_student_section(sess: Session):
               f"Course: {stu.courseNumber}, Section: {stu.sectionNumber}")
 
 def list_section_student(sess: Session): #might still need work i haven't tested it
-    #prompt user for student and list the sections the student is enrolled in
+    #prompt user for section and list the students enrolled in it
     student: Student = select_section(sess)
     if not student:
         print("Student not found")
