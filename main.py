@@ -59,7 +59,6 @@ def add_department(session: Session):
     office: int = 0
     description: str = ''
 
-
     while not unique_abbreviation or not unique_name:
         name = input("Department full name--> ")
         abbreviation = input("Department abbreviation--> ")
@@ -83,18 +82,19 @@ def add_department(session: Session):
                 if not unique_chairName:
                     print("We already have a department with that chair name. Try again.")
                 if unique_chairName:
-                    build_count: int = session.query(Department).filter(Department.building == building, Department.office == office).count()
+                    build_count: int = session.query(Department).filter(Department.building == building,
+                                                                        Department.office == office).count()
                     unique_building_and_office = build_count == 0
                     if not unique_building_and_office:
                         print("We already have a department with that building and office. Try again.")
                     if unique_building_and_office:
-                        description_count: int = session.query(Department).filter(Department.description == description).count()
+                        description_count: int = session.query(Department).filter(
+                            Department.description == description).count()
                         unique_description = description_count == 0
                         if not unique_description:
                             print("We already have a department with that description. Try again.")
 
-
-    new_department = Department(abbreviation, name, chairName, building,office, description)
+    new_department = Department(abbreviation, name, chairName, building, office, description)
     session.add(new_department)
 
 
@@ -184,13 +184,14 @@ def add_student(session: Session):
     new_student = Student(last_name, first_name, email)
     session.add(new_student)
 
-def add_section(session): #ask if we need an add_section?
+
+def add_section(session):  # ask if we need an add_section?
     print("Which course offers this section?")
     course: Course = select_course(sess)
     unique_section_number: bool = False
-    #for set of uk's i. no more than 1 section in same room at same time
+    # for set of uk's i. no more than 1 section in same room at same time
     unique_room_set: bool = False
-    #for set of uk's ii. never overbook instructor teaching 2 sections at same time
+    # for set of uk's ii. never overbook instructor teaching 2 sections at same time
     unique_instructor_set: bool = False
 
     section_number: int = -1
@@ -227,25 +228,27 @@ def add_section(session): #ask if we need an add_section?
             valid_building = False
 
         if valid_semester or valid_schedule or valid_building:
-            section_number_count: int = session.query(Section).filter(Section.departmentAbbreviation == course.departmentAbbreviation,
-                                                                      Section.courseNumber == course.courseNumber,
-                                                                      Section.sectionYear == sectionYear,
-                                                                      Section.sectionNumber == sectionNumber,
-                                                                      Section.semester == semester).count()
+            section_number_count: int = session.query(Section).filter(
+                Section.departmentAbbreviation == course.departmentAbbreviation,
+                Section.courseNumber == course.courseNumber,
+                Section.sectionYear == sectionYear,
+                Section.sectionNumber == sectionNumber,
+                Section.semester == semester).count()
             unique_section_number = section_number_count == 0
             if not unique_section_number:
                 print("We already have a section with that number for this course. Try again.")
             if unique_section_number:
                 room_set_count: int = session.query(Section).filter(Section.sectionYear == sectionYear,
-                                                                           Section.semester == semester,
-                                                                           Section.schedule == schedule,
-                                                                           Section.startTime == startTime,
-                                                                           Section.building == building,
-                                                                           Section.room == room).count()
+                                                                    Section.semester == semester,
+                                                                    Section.schedule == schedule,
+                                                                    Section.startTime == startTime,
+                                                                    Section.building == building,
+                                                                    Section.room == room).count()
                 unique_room_set = room_set_count == 0
                 if not unique_room_set:
-                    print("We already have a section with the same year, semester, schedule, start time, and in the same room."
-                          "Try again.")
+                    print(
+                        "We already have a section with the same year, semester, schedule, start time, and in the same room."
+                        "Try again.")
                 if unique_room_set:
                     instructor_set_count: int = session.query(Section).filter(Section.sectionYear == sectionYear,
                                                                               Section.semester == semester,
@@ -254,16 +257,20 @@ def add_section(session): #ask if we need an add_section?
                                                                               Section.instructor == instructor).count()
                     unique_instructor_set = instructor_set_count == 0
                     if not unique_instructor_set:
-                        print("We already have a section with the same year, semester, schedule, start time, taught by the same"
-                                  "instructor. Try again.")
+                        print(
+                            "We already have a section with the same year, semester, schedule, start time, taught by the same"
+                            "instructor. Try again.")
         startTime = time(startTimeHour, startTimeMinute, 0)
-        newSection = Section(course, sectionNumber, semester, sectionYear, building, room, schedule, startTime, instructor)
+        newSection = Section(course, sectionNumber, semester, sectionYear, building, room, schedule, startTime,
+                             instructor)
         session.add(newSection)
+
+
 def add_student_section(sess):
     student: Student = select_student(sess)
     section: Section = select_section(sess)
     student_section_count: int = sess.query(Enrollment).filter(Enrollment.studentID == student.studentID,
-                                                               Enrollment.sectionID == section.sectionID)
+                                                               Enrollment.sectionID == section.sectionID).count()
     unique_student_section: bool = student_section_count == 0
     while not unique_student_section:
         print("That student is already enrolled in that section. Try again.")
@@ -272,13 +279,14 @@ def add_student_section(sess):
     student.add_section(section)
     sess.add(student)
     sess.flush()
-    #need to enroll student in a section, finished
+    # need to enroll student in a section, finished
+
 
 def add_section_student(sess):
     section: Section = select_section(sess)
     student: Student = select_student(sess)
     section_student_count: int = sess.query(Enrollment).filter(Enrollment.studentID == student.studentID,
-                                                               Enrollment.sectionID == section.sectionID)
+                                                               Enrollment.sectionID == section.sectionID).count()
     unique_section_student: bool = section_student_count == 0
     while not unique_section_student:
         print("That section already has that student enrolled in it. Try again.")
@@ -287,8 +295,7 @@ def add_section_student(sess):
     section.add_student(student)
     sess.add(section)
     sess.flush()
-    #need to enroll section to a student, similar to below methods, finished
-
+    # need to enroll section to a student, similar to below methods, finished
 
 
 def add_student_major(sess):
@@ -312,7 +319,7 @@ def add_student_major(sess):
     the new instance of StudentMajor to the session.  THEN, when we flush the session, that 
     transient instance of StudentMajor gets inserted into the database, and is ready to be 
     committed later (which happens automatically when we exit the application)."""
-    sess.add(student)                           # add the StudentMajor to the session
+    sess.add(student)  # add the StudentMajor to the session
     sess.flush()
 
 
@@ -337,7 +344,7 @@ def add_major_student(sess):
     the new instance of StudentMajor to the session.  THEN, when we flush the session, that 
     transient instance of StudentMajor gets inserted into the database, and is ready to be 
     committed later (which happens automatically when we exit the application)."""
-    sess.add(major)                           # add the StudentMajor to the session
+    sess.add(major)  # add the StudentMajor to the session
     sess.flush()
 
 
@@ -406,9 +413,9 @@ def select_student(sess) -> Student:
                                                   Student.firstName == first_name).first()
     return student
 
-def select_section(sess) -> Section: #still need to work on this one
-    #prompt the user for a course
-    #go to the list of sections within that course object and display the sections
+def select_section(sess) -> Section:  # still need to work on this one
+    # prompt the user for a course
+    # go to the list of sections within that course object and display the sections
     found: bool = False
     sectionYear = -1
     semester = ''
@@ -433,6 +440,7 @@ def select_section(sess) -> Section: #still need to work on this one
                                          Section.instructor == instructor).first()
     print("Selected section:\n", section)
     return section
+
 
 def select_major(sess) -> Major:
     """
@@ -483,7 +491,9 @@ def delete_department(session: Session):
               "then come back here to delete the department.")
     else:
         session.delete(department)
-#added
+
+
+# added
 def delete_section(session: Session):
     print("deleting a section")
     section = select_section(session)
@@ -494,10 +504,11 @@ def delete_section(session: Session):
     else:
         session.delete(section)
 
-#def delete_course(session: Session): ? not sure if we need this ?
+
+# def delete_course(session: Session): ? not sure if we need this ?
 
 def delete_student_section(sess):
-    #use remove_enrollment i think in here
+    # use remove_enrollment i think in here
     print("deleting a student from a section")
     student: Student = select_student(sess)
     section: Section = select_section(sess)
@@ -511,7 +522,6 @@ def delete_student_section(sess):
         sess.delete(enrollment)
 
 
-
 def delete_section_student(sess):
     print("deleting section from a student")
     student: Student = select_student(sess)
@@ -519,11 +529,10 @@ def delete_section_student(sess):
     if not student or not section:
         print("Student or section does not exist")
         return
-    if section in student.enrollments:
-        student.enrollments.remove(section)
+    if section in student.sections:
+        student.sections.remove(section)
     else:
         print("Student does not have that section")
-
 
 
 def delete_student_major(sess):
@@ -623,20 +632,21 @@ def list_major_student(sess: Session):
     for stu in recs:
         print(f"Student name: {stu.lastName}, {stu.firstName}, Major: {stu.name}, Description: {stu.description}")
 
-def list_section_student(sess: Session): #might still need work i haven't tested it
+def list_student_section(sess: Session):
     #Prompt user for section and list students enrolled in that section
-    section: Section = select_section(sess)
-    if not section:
-        print("Section not found")
+    student: Student = select_student(sess)
+    if not student:
+        print("Student not found")
         return
-    students_in_section = sess.query(Student).join(Enrollment, Enrollment.sectionID == Student.se).join(
-        Student, Enrollment.sectionID == Section.sectionID).filter(
-    Section.sectionID == section.sectionID).add_columns(Student.lastName,Student.firstName, Section.sectionID).all()
-
+    students_in_section = sess.query(Student).join(Enrollment, Student.studentID == Enrollment.studentID).join(
+        Section, Enrollment.sectionID == Section.sectionID).filter(Student.studentID == student.studentID).add_columns(
+        Student.lastName, Student.firstName, Section.departmentAbbreviation, Section.courseNumber,
+        Section.sectionNumber).all()
     for stu in students_in_section:
-        print(f"Student name: {stu.lastName}, {stu.firstName}, Section: {stu.sectionID}")
+        print(f"Student name: {stu.lastName}, {stu.firstName}, Department: {stu.departmentAbbreviation},"
+              f"Course: {stu.courseNumber}, Section: {stu.sectionNumber}")
 
-def list_student_section(sess: Session): #might still need work i haven't tested it
+def list_section_student(sess: Session): #might still need work i haven't tested it
     #prompt user for student and list the sections the student is enrolled in
     student: Student = select_section(sess)
     if not student:
@@ -752,7 +762,7 @@ def boilerplate(sess):
     sess.add(student1)
     sess.add(student2)
     sess.add(student3)
-    sess.flush()                                # Force SQLAlchemy to update the database, although not commit
+    sess.flush()  # Force SQLAlchemy to update the database, although not commit
 
 
 def session_rollback(sess):
