@@ -41,10 +41,10 @@ delete_menu = Menu('delete', 'Please indicate what you want to delete from:', [
     Option("Course", "delete_course(sess)"),
     Option("Major", "delete_major(sess)"),
     Option("Student", "delete_student(sess)"),
-    Option("Student from Section", "delete_student_section(sess)"),
-    Option("Section from Student", "delete_section_student(sess)"),
     Option("Student to Major", "delete_student_major(sess)"),
     Option("Major to Student", "delete_major_student(sess)"),
+    Option("Student from Section", "delete_student_section(sess)"),
+    Option("Section from Student", "delete_section_student(sess)"),
     Option("Exit", "pass")
 ])
 
@@ -53,10 +53,10 @@ list_menu = Menu('list', 'Please indicate what you want to list:', [
     Option("Course", "list_course(sess)"),
     Option("Major", "list_major(sess)"),
     Option("Student", "list_student(sess)"),
-    Option("Student in Section", "list_student_section(sess)"),
-    Option("Section to Student", "list_section_student(sess)"),
     Option("Student to Major", "list_student_major(sess)"),
     Option("Major to Student", "list_major_student(sess)"),
+    Option("Student in Section", "list_student_section(sess)"),
+    Option("Section to Student", "list_section_student(sess)"),
     Option("Exit", "pass")
 ])
 
