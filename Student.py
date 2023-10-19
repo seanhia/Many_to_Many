@@ -53,8 +53,8 @@ class Student(Base):
         # Create the new instance of StudentMajor to connect this Student to the supplied Major.
         student_major = StudentMajor(self, major, datetime.now())
 
-    #        major.students.append(student_major)                # Add this Student to the supplied Major.
-    #        self.majors.append(student_major)                   # Add the supplied Major to this student.
+        major.students.append(student_major)                # Add this Student to the supplied Major.
+        self.majors.append(student_major)                   # Add the supplied Major to this student.
 
     def remove_major(self, major):
         """
@@ -75,7 +75,10 @@ class Student(Base):
         for next_section in self.sections:
             if next_section.student == section:
                 return
-        enrollment = Enrollment(section, self)
+        #enrollment = Enrollment(self, section)
+        student_section = Enrollment(self, section)
+        section.students.append(student_section)
+        self.sections.append(student_section)
 
     def remove_enrollment(self, section):
         for next_section in self.sections:
