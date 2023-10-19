@@ -73,11 +73,15 @@ class Section(Base):
         self.departmentAbbreviation = course.departmentAbbreviation
         self.courseNumber = course.courseNumber
 
+    # basing off add_major/add_student from student.py
     def add_student(self, student):
         for next_student in self.students:
             if next_student.student == student:
                 return
-        enrollment = Enrollment(student, self)
+        #enrollment = Enrollment(self, student)
+        section_student = Enrollment(self, student)
+        student.sections.append(section_student)
+        self.students.append(section_student)
 
     def remove_enrollment(self, student):
         for next_student in self.students:
