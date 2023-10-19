@@ -185,7 +185,7 @@ def add_student(session: Session):
     session.add(new_student)
 
 
-def add_section(session):  # ask if we need an add_section?
+def add_section(session):
     print("Which course offers this section?")
     course: Course = select_course(sess)
     unique_section_number: bool = False
@@ -265,7 +265,7 @@ def add_section(session):  # ask if we need an add_section?
                              instructor)
         session.add(newSection)
 
-
+#finished
 def add_student_section(sess):
     student: Student = select_student(sess)
     section: Section = select_section(sess)
@@ -279,14 +279,13 @@ def add_student_section(sess):
     student.add_section(section)
     sess.add(student)
     sess.flush()
-    # need to enroll student in a section, finished
 
-
+#finished
 def add_section_student(sess):
     section: Section = select_section(sess)
     student: Student = select_student(sess)
-    section_student_count: int = sess.query(Enrollment).filter(Enrollment.studentID == student.studentID,
-                                                               Enrollment.sectionID == section.sectionID).count()
+    section_student_count: int = sess.query(Enrollment).filter(Enrollment.sectionID == section.sectionID,
+                                                               Enrollment.studentID == student.studentID).count()
     unique_section_student: bool = section_student_count == 0
     while not unique_section_student:
         print("That section already has that student enrolled in it. Try again.")
@@ -295,7 +294,6 @@ def add_section_student(sess):
     section.add_student(student)
     sess.add(section)
     sess.flush()
-    # need to enroll section to a student, similar to below methods, finished
 
 
 def add_student_major(sess):
@@ -413,7 +411,8 @@ def select_student(sess) -> Student:
                                                   Student.firstName == first_name).first()
     return student
 
-def select_section(sess) -> Section:  # still need to work on this one
+
+def select_section(sess) -> Section:
     # prompt the user for a course
     # go to the list of sections within that course object and display the sections
     found: bool = False
@@ -459,7 +458,7 @@ def select_major(sess) -> Major:
     major: Major = sess.query(Major).filter(Major.name == name).first()
     return major
 
-
+#finished
 def delete_student(session: Session):
     """
     Prompt the user for a student to delete and delete them.
@@ -491,7 +490,7 @@ def delete_department(session: Session):
         session.delete(department)
 
 
-# added
+#finished
 def delete_section(session: Session):
     print("deleting a section")
     section = select_section(session)
@@ -502,33 +501,24 @@ def delete_section(session: Session):
     else:
         session.delete(section)
 
-
+#unenroll student starting with student, finished
 def delete_student_section(sess):
-    # use remove_enrollment i think in here
     print("deleting a student from a section")
     student: Student = select_student(sess)
     section: Section = select_section(sess)
-    if not student or not section:
-        print("Student or section does not exist")
-        return
-    enrollment = sess.query(Enrollment).filter(Enrollment.student == student, Enrollment.section == section).first()
-    if not enrollment:
-        print("Student is not enrolled in this section")
-    else:
-        sess.delete(enrollment)
+    if student not in section.students:
+        print(f"{student.firstName} {student.lastName} is not enrolled in this section.")
+    student.remove_enrollment(section)
 
-
+#unenroll student starting with section, finished
 def delete_section_student(sess):
     print("deleting section from a student")
-    student: Student = select_student(sess)
     section: Section = select_section(sess)
-    if not student or not section:
-        print("Student or section does not exist")
-        return
-    if section in student.sections:
-        student.sections.remove(section)
+    student: Student = select_student(sess)
+    if student not in section.students:
+        print(f"{student.firstName} {student.lastName} is not enrolled in this section. Try again.")
     else:
-        print("Student does not have that section")
+        section.remove_enrollment(student)
 
 
 def delete_student_major(sess):
@@ -631,9 +621,6 @@ def list_major_student(sess: Session):
 def list_student_section(sess: Session):
     #Prompt user for student and list sections enrolled in that section
     student: Student = select_student(sess)
-    if not student:
-        print("Student not found")
-        return
     students_in_section = sess.query(Student).join(Enrollment, Student.studentID == Enrollment.studentID).join(
         Section, Enrollment.sectionID == Section.sectionID).filter(Student.studentID == student.studentID).add_columns(
         Student.lastName, Student.firstName, Section.departmentAbbreviation, Section.courseNumber,
@@ -642,17 +629,16 @@ def list_student_section(sess: Session):
         print(f"Student name: {stu.lastName}, {stu.firstName}, Department: {stu.departmentAbbreviation},"
               f"Course: {stu.courseNumber}, Section: {stu.sectionNumber}")
 
-def list_section_student(sess: Session): #might still need work i haven't tested it
-    #prompt user for section and list the students enrolled in it
-    student: Student = select_section(sess)
-    if not student:
-        print("Student not found")
-        return
+def list_section_student(sess: Session):
+    #Prompt user for section and list the students enrolled in it
+    section: Section = select_section(sess)
     sections_in_student = sess.query(Section).join(Enrollment, Enrollment.sectionID == Section.sectionID).join(
-    Section, Enrollment.studentID == Student.studentID).filter(Student.studentID == student.studentID).add_coumns(Student.lastName,Student.firstName, Section.sectionID).all()
-
+        Student, Enrollment.studentID == Student.studentID).filter(Student.studentID == section.sectionID).add_columns(
+        Student.lastName, Student.firstName, Section.departmentAbbreviation, Section.courseNumber,
+        Section.sectionNumber).all()
     for stu in sections_in_student:
-        print(f"Student name: {stu.lastName}, {stu.firstName}, Section: {stu.sectionID}")
+        print(f"Student name: {stu.lastName}, {stu.firstName}, Department: {stu.departmentAbbreviation},"
+              f"Course: {stu.courseNumber}, Section: {stu.sectionNumber}")
 
 
 def move_course_to_new_department(sess: Session):
