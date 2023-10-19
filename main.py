@@ -517,8 +517,7 @@ def delete_section_student(sess):
     student: Student = select_student(sess)
     if student not in section.students:
         print(f"{student.firstName} {student.lastName} is not enrolled in this section. Try again.")
-    else:
-        section.remove_enrollment(student)
+    section.remove_enrollment(student)
 
 
 def delete_student_major(sess):
@@ -624,10 +623,10 @@ def list_student_section(sess: Session):
     students_in_section = sess.query(Student).join(Enrollment, Student.studentID == Enrollment.studentID).join(
         Section, Enrollment.sectionID == Section.sectionID).filter(Student.studentID == student.studentID).add_columns(
         Student.lastName, Student.firstName, Section.departmentAbbreviation, Section.courseNumber,
-        Section.sectionNumber).all()
+        Section.sectionNumber, Section.semester).all()
     for stu in students_in_section:
         print(f"Student name: {stu.lastName}, {stu.firstName}, Department: {stu.departmentAbbreviation},"
-              f"Course: {stu.courseNumber}, Section: {stu.sectionNumber}")
+              f"Course: {stu.courseNumber}, Section: {stu.sectionNumber}, Semester: {stu.semester}")
 
 def list_section_student(sess: Session):
     #Prompt user for section and list the students enrolled in it
@@ -635,10 +634,10 @@ def list_section_student(sess: Session):
     sections_in_student = sess.query(Section).join(Enrollment, Enrollment.sectionID == Section.sectionID).join(
         Student, Enrollment.studentID == Student.studentID).filter(Student.studentID == section.sectionID).add_columns(
         Student.lastName, Student.firstName, Section.departmentAbbreviation, Section.courseNumber,
-        Section.sectionNumber).all()
+        Section.sectionNumber, Section.semester).all()
     for stu in sections_in_student:
         print(f"Student name: {stu.lastName}, {stu.firstName}, Department: {stu.departmentAbbreviation},"
-              f"Course: {stu.courseNumber}, Section: {stu.sectionNumber}")
+              f"Course: {stu.courseNumber}, Section: {stu.sectionNumber}, Semester: {stu.semester}")
 
 
 def move_course_to_new_department(sess: Session):
