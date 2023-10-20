@@ -491,7 +491,6 @@ def delete_student(session: Session):
     """
     print("deleting a student")
     student = select_student(session)
-    #n_sections = session.query(Enrollment).filter(Enrollment.studentID == Student.studentID).count()
     n_sections = session.query(Course).filter(Course.courseNumber == Student.studentID).count()
     if n_sections > 0:
         print(f"Sorry, this student is enrolled in {n_sections} sections. Delete them first, then try again.")
@@ -519,7 +518,7 @@ def delete_department(session: Session):
 def delete_section(session: Session):
     print("deleting a section")
     section = select_section(session)
-    n_enrollments = session.query(Enrollment).filter(Enrollment.sectionID == Section.sectionID).count()
+    n_enrollments = session.query(Enrollment).filter(Course.courseNumber == Section.sectionID).count()
     if n_enrollments > 0:
         print(f"Sorry, there are {n_enrollments} enrollments in that section. Delete them first, "
               f"then come back here to delete the section.")
@@ -531,8 +530,6 @@ def delete_student_section(sess):
     print("deleting a student from a section")
     student: Student = select_student(sess)
     section: Section = select_section(sess)
-   # if student not in section.students:
-      #  print(f"{student.firstName} {student.lastName} is not enrolled in this section.")
     student.remove_enrollment(section)
 
 #unenroll student starting with section, finished
@@ -540,8 +537,6 @@ def delete_section_student(sess):
     print("deleting section from a student")
     section: Section = select_section(sess)
     student: Student = select_student(sess)
-    #if student not in section.students:
-        #print(f"{student.firstName} {student.lastName} is not enrolled in this section. Try again.")
     section.remove_enrollment(student)
 
 

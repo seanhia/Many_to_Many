@@ -75,7 +75,7 @@ class Student(Base):
         for next_section in self.sections:
             if next_section.student == section:
                 return
-        enrollment = Enrollment(section, self)
+        enrollment = Enrollment(self, section)
 
 
     def remove_enrollment(self, section):

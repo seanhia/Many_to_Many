@@ -21,7 +21,7 @@ class Section(Base):
     sectionID: Mapped[int] = mapped_column('section_id', Integer, Identity(start=1, cycle=True), primary_key=True)
 
     departmentAbbreviation: Mapped[str] = mapped_column('department_abbreviation', String(10), primary_key=True)
-    courseNumber: Mapped[int] = mapped_column('course_number', Integer, primary_key=True)
+    courseNumber: Mapped[int] = mapped_column('course_number', Integer, primary_key=False)
     sectionNumber: Mapped[int] = mapped_column('section_number', Integer, primary_key=True)
     semester: Mapped[str] = mapped_column('semester', String(10), CheckConstraint(
         "semester IN('Fall','Spring','Winter','Summer I','Summer II')",
@@ -40,7 +40,6 @@ class Section(Base):
     instructor: Mapped[str] = mapped_column('instructor', String(80), nullable=False)
 
     course: Mapped[List["Course"]] = relationship(back_populates="sections")
-    # i think this how section "knows" all sections they're enrolled in
     students: Mapped[List["Enrollment"]] = relationship(back_populates="section", cascade="all, save-update, "
                                                                                           "delete-orphan")
 
@@ -48,9 +47,10 @@ class Section(Base):
                                        "building", "room", name="sections_uk_01"),
                       UniqueConstraint("section_year", "semester", "schedule", "start_time",
                                        "instructor", name="sections_uk_02"),
-                      # might need another uk for section_id?
                       UniqueConstraint("department_abbreviation", "course_number", "section_number", "semester",
                                        "section_year", name="sections_uk_03"),
+                      #needed if tables start over
+                      #UniqueConstraint("section_id", name="sections_uk_04"),
                       ForeignKeyConstraint([departmentAbbreviation, courseNumber],
                                            [Course.departmentAbbreviation, Course.courseNumber]))
 
