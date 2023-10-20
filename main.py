@@ -269,13 +269,25 @@ def add_section(session):
 def add_student_section(sess):
     student: Student = select_student(sess)
     section: Section = select_section(sess)
-    student_section_count: int = sess.query(Enrollment).filter(Enrollment.studentID == student.studentID,
-                                                               Enrollment.sectionID == section.sectionID).count()
-    unique_student_section: bool = student_section_count == 0
-    while not unique_student_section:
-        print("That student is already enrolled in that section. Try again.")
+    is_enrolled = sess.query(Enrollment).join(Section).filter(
+        Enrollment.student == student,
+        Section.sectionID == Enrollment.sectionID,
+        Section.departmentAbbreviation == section.departmentAbbreviation,
+        Section.courseNumber == section.courseNumber,
+        Section.sectionYear == section.sectionYear,
+        Section.semester == section.semester).count() > 0
+    while is_enrolled:
+        print("That student is already enrolled in that course for the semester. Try again.")
         student = select_student(sess)
         section = select_section(sess)
+        #constraint for surrogate key if student is already in a section for same course in same year/semester
+        is_enrolled = sess.query(Enrollment).join(Section).filter(
+            Enrollment.student == student,
+            Section.sectionID == Enrollment.sectionID,
+            Section.departmentAbbreviation == section.departmentAbbreviation,
+            Section.courseNumber == section.courseNumber,
+            Section.sectionYear == section.sectionYear,
+            Section.semester == section.semester).count() > 0
     student.add_section(section)
     sess.add(student)
     sess.flush()
@@ -284,13 +296,25 @@ def add_student_section(sess):
 def add_section_student(sess):
     section: Section = select_section(sess)
     student: Student = select_student(sess)
-    section_student_count: int = sess.query(Enrollment).filter(Enrollment.sectionID == section.sectionID,
-                                                               Enrollment.studentID == student.studentID).count()
-    unique_section_student: bool = section_student_count == 0
-    while not unique_section_student:
-        print("That section already has that student enrolled in it. Try again.")
+    # constraint for surrogate key if section already has a student for same course in same year/semester
+    is_enrolled = sess.query(Enrollment).join(Section).filter(
+        Enrollment.student == student,
+        Student.studentID == Enrollment.studentID,
+        Section.departmentAbbreviation == section.departmentAbbreviation,
+        Section.courseNumber == section.courseNumber,
+        Section.sectionYear == section.sectionYear,
+        Section.semester == section.semester).count() > 0
+    while is_enrolled:
+        print("That section already has that student enrolled in it for the semester. Try again.")
         section = select_section(sess)
         student = select_student(sess)
+        is_enrolled = sess.query(Enrollment).join(Section).filter(
+            Enrollment.student == student,
+            Student.studentID == Enrollment.studentID,
+            Section.departmentAbbreviation == section.departmentAbbreviation,
+            Section.courseNumber == section.courseNumber,
+            Section.sectionYear == section.sectionYear,
+            Section.semester == section.semester).count() > 0
     section.add_student(student)
     sess.add(section)
     sess.flush()
